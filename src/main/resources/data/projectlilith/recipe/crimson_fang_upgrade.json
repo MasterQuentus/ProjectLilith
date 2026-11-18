@@ -1,18 +1,13 @@
 {
-    "type": "projectlilith:crimson_fang_upgrade",
-    "ingredients": [
-        {
-            "item": "projectlilith:lilith_contract"
-        },
-        {
-            "item": "projectlilith:lilith_soul"
-        },
-        {
-            "item": "projectlilith:crimson_fang"
-        }
-    ],
+    "type": "minecraft:smithing_transform",
+    "template": { "item": "projectlilith:lilith_contract" },
+    "base": { "item": "projectlilith:crimson_fang" },
+    "addition": { "item": "projectlilith:lilith_soul" },
     "result": {
-        "item": "projectlilith:crimson_fang",
-        "count": 1
+        "id": "projectlilith:crimson_fang",
+        "count": 1,
+        "components": {
+            "minecraft:custom_data": { "upgradedCrimsonFang": true }
+        }
     }
 }

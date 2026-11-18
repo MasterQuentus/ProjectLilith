@@ -4,17 +4,9 @@ import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.creativemodtab.ModCreativeModTabs;
 import com.masterquentus.projectlilith.entity.ModEntities;
 import com.masterquentus.projectlilith.item.ModItems;
-import com.masterquentus.projectlilith.recipe.ModRecipes;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
-
-// TODO: Make sure these imports match your actual package structure!
-// import com.masterquentus.projectlilith.item.ModItems;
-// import com.masterquentus.projectlilith.block.ModBlocks;
-// import com.masterquentus.projectlilith.item.ModCreativeModTabs;
-// import com.masterquentus.projectlilith.entity.ModEntities;
-
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
@@ -35,9 +27,6 @@ public class ProjectLilith {
 
         // Register Deferred Registers
         ModCreativeModTabs.register(modEventBus);
-
-        LOGGER.info("REGISTERING RECIPES...");
-        ModRecipes.register(modEventBus);
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
