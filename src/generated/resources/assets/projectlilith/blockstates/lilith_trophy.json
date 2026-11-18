@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "projectlilith:block/lilith_trophy",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "projectlilith:block/lilith_trophy"
+    },
+    "facing=south": {
+      "model": "projectlilith:block/lilith_trophy",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "projectlilith:block/lilith_trophy",
+      "y": 270
+    }
+  }
+}

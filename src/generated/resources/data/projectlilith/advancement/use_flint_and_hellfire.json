@@ -1,0 +1,33 @@
+{
+  "criteria": {
+    "has_flint_and_hellfire": {
+      "conditions": {
+        "items": [
+          {
+            "items": "projectlilith:flint_and_hellfire"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "background": "minecraft:textures/gui/advancements/backgrounds/nether.png",
+    "description": {
+      "translate": "advancements.projectlilith.use_flint_and_hellfire.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "projectlilith:flint_and_hellfire"
+    },
+    "title": {
+      "translate": "advancements.projectlilith.use_flint_and_hellfire.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_flint_and_hellfire"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
