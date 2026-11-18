@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "powered=false": {
+      "model": "projectlilith:block/crimson_stone_pressure_plate"
+    },
+    "powered=true": {
+      "model": "projectlilith:block/crimson_stone_pressure_plate_down"
+    }
+  }
+}

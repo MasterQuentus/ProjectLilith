@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "projectlilith:block/polished_crimson_stone_slab"
+    },
+    "type=double": {
+      "model": "projectlilith:block/polished_crimson_stone"
+    },
+    "type=top": {
+      "model": "projectlilith:block/polished_crimson_stone_slab_top"
+    }
+  }
+}

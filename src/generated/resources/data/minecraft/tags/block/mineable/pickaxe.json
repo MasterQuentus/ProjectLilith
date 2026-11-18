@@ -1,5 +1,22 @@
 {
   "values": [
-    "projectlilith:lilith_trophy"
+    "projectlilith:lilith_trophy",
+    "projectlilith:crimson_stone",
+    "projectlilith:crimson_cobblestone",
+    "projectlilith:crimson_stone_bricks",
+    "projectlilith:polished_crimson_stone",
+    "projectlilith:chiseled_crimson_stone",
+    "projectlilith:cracked_crimson_stone",
+    "projectlilith:crimson_stone_stairs",
+    "projectlilith:crimson_cobblestone_stairs",
+    "projectlilith:crimson_stone_bricks_stairs",
+    "projectlilith:polished_crimson_stone_stairs",
+    "projectlilith:crimson_stone_slab",
+    "projectlilith:crimson_cobblestone_slab",
+    "projectlilith:crimson_stone_bricks_slab",
+    "projectlilith:polished_crimson_stone_slab",
+    "projectlilith:crimson_stone_wall",
+    "projectlilith:crimson_stone_button",
+    "projectlilith:crimson_stone_pressure_plate"
   ]
 }

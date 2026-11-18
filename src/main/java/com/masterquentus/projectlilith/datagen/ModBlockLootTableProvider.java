@@ -26,6 +26,37 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
     @Override
     protected void generate() {
         dropSelf(ModBlocks.LILITH_TROPHY.get());
+
+        // Stone drops Cobblestone unless mined with Silk Touch
+        this.add(ModBlocks.CRIMSON_STONE.get(),
+                block -> createSingleItemTableWithSilkTouch(block, ModBlocks.CRIMSON_COBBLESTONE.get()));
+
+        dropSelf(ModBlocks.CRIMSON_COBBLESTONE.get());
+        dropSelf(ModBlocks.CRIMSON_STONE_BRICKS.get());
+        dropSelf(ModBlocks.POLISHED_CRIMSON_STONE.get());
+        dropSelf(ModBlocks.CHISELED_CRIMSON_STONE.get());
+        dropSelf(ModBlocks.CRACKED_CRIMSON_STONE.get());
+
+        // Stairs
+        dropSelf(ModBlocks.CRIMSON_STONE_STAIRS.get());
+        dropSelf(ModBlocks.CRIMSON_COBBLESTONE_STAIRS.get());
+        dropSelf(ModBlocks.CRIMSON_STONE_BRICKS_STAIRS.get());
+        dropSelf(ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get());
+
+        // Slabs (use createSlabItemTable so double slabs drop 2)
+        this.add(ModBlocks.CRIMSON_STONE_SLAB.get(),
+                block -> createSlabItemTable(ModBlocks.CRIMSON_STONE_SLAB.get()));
+        this.add(ModBlocks.CRIMSON_COBBLESTONE_SLAB.get(),
+                block -> createSlabItemTable(ModBlocks.CRIMSON_COBBLESTONE_SLAB.get()));
+        this.add(ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get(),
+                block -> createSlabItemTable(ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get()));
+        this.add(ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get(),
+                block -> createSlabItemTable(ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get()));
+
+        // Wall, Button, Pressure Plate
+        dropSelf(ModBlocks.CRIMSON_STONE_WALL.get());
+        dropSelf(ModBlocks.CRIMSON_STONE_BUTTON.get());
+        dropSelf(ModBlocks.CRIMSON_STONE_PRESSURE_PLATE.get());
     }
 
     protected LootTable.Builder createMultipleOreDrops(Block block, Item item, float minDrops, float maxDrops) {

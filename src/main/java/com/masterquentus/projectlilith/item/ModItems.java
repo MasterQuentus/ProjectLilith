@@ -1,12 +1,14 @@
 package com.masterquentus.projectlilith.item;
 
 import com.masterquentus.projectlilith.ProjectLilith;
+import com.masterquentus.projectlilith.entity.ModEntities;
 import com.masterquentus.projectlilith.item.custom.CrimsonFang;
 import com.masterquentus.projectlilith.item.custom.FlintAndHellfireItem;
 import com.masterquentus.projectlilith.item.custom.HellfireChargeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -28,6 +30,9 @@ public class ModItems {
     public static final DeferredItem<CrimsonFang> CRIMSON_FANG =
             ITEMS.registerItem("crimson_fang",
                     props -> new CrimsonFang(Tiers.NETHERITE, 3, -2.4F, props));
+
+    public static final DeferredItem<Item> LILITH_SPAWN_EGG = ITEMS.register("lilith_spawn_egg",
+            () -> new DeferredSpawnEggItem(ModEntities.LILITH, 0x590000, 0x2D0B0B, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);

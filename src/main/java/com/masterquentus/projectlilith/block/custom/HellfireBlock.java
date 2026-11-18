@@ -1,5 +1,7 @@
 package com.masterquentus.projectlilith.block.custom;
 
+import com.masterquentus.projectlilith.Config;
+import com.masterquentus.projectlilith.item.entity.LilithEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -12,11 +14,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.List;
 
 public class HellfireBlock extends FireBlock {
 
@@ -24,10 +29,19 @@ public class HellfireBlock extends FireBlock {
         super(properties.replaceable());
     }
 
-    // Survives on any block
     @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        if (level instanceof Level realLevel) {
+            List<? extends String> allowed = Config.HELLFIRE_DIMENSIONS.get();
+            return allowed.isEmpty() || allowed.contains(realLevel.dimension().location().toString());
+        }
         return true;
+    }
+
+    @Override
+    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+                                     LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+        return this.canSurvive(state, level, pos) ? state : Blocks.AIR.defaultBlockState();
     }
 
     // Never extinguish naturally
@@ -38,10 +52,6 @@ public class HellfireBlock extends FireBlock {
 
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean isMoving) {}
-
-    @Override
-    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
-    }
 
     @Override
     public boolean isRandomlyTicking(BlockState state) {
@@ -73,9 +83,11 @@ public class HellfireBlock extends FireBlock {
                 (random.nextDouble() - 0.5) * 0.1);
     }
 
-    // Damage entities touching the block
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
+        // Don't burn Lilith or her bats with her own fire
+        if (entity instanceof LilithEntity || entity instanceof LilithEntity.LilithBat) return;
+
         super.entityInside(state, level, pos, entity);
         entity.hurt(level.damageSources().cactus(), 1.0F);
         entity.igniteForSeconds(1.0F);

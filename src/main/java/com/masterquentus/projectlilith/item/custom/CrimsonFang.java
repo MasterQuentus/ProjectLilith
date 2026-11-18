@@ -115,7 +115,7 @@ public class CrimsonFang extends SwordItem {
             );
         } else {
             tooltipComponents.add(
-                    Component.literal("Requires Lilith's Soul & Contract")
+                    Component.literal("Upgrade at a Smithing Table: Contract (template) + Soul (addition)")
                             .withStyle(ChatFormatting.GRAY)
             );
         }

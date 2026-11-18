@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab",
+  "textures": {
+    "bottom": "projectlilith:block/polished_crimson_stone",
+    "side": "projectlilith:block/polished_crimson_stone",
+    "top": "projectlilith:block/polished_crimson_stone"
+  }
+}

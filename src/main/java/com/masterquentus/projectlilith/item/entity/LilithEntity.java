@@ -1,18 +1,24 @@
 package com.masterquentus.projectlilith.item.entity;
 
+import com.masterquentus.projectlilith.Config;
+import com.masterquentus.projectlilith.ProjectLilith;
 import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.entity.ModEntities;
 import com.masterquentus.projectlilith.item.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -129,6 +135,16 @@ public class LilithEntity extends Monster implements GeoEntity {
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
+
+        // Ability state isn't saved, so clear what an interrupted ability left behind
+        this.setNoAi(false);
+        this.setInvulnerable(false);
+        this.setSilent(false);
+        this.setInvisible(false);
+        this.isUsingDarkDominion = false;
+        this.isTransformed = false;
+        this.darkDominionRounds = 0;
+
         this.spinningFireballUUIDs.clear();
         if (compound.contains("SpinningFireballs", 9)) {
             net.minecraft.nbt.ListTag listTag = compound.getList("SpinningFireballs", 11);
@@ -136,6 +152,10 @@ public class LilithEntity extends Monster implements GeoEntity {
                 this.spinningFireballUUIDs.add(net.minecraft.nbt.NbtUtils.loadUUID(listTag.get(i)));
             }
         }
+    }
+
+    private List<Player> nearbyPlayers() {
+        return level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(64.0D));
     }
 
     @Override
@@ -149,7 +169,10 @@ public class LilithEntity extends Monster implements GeoEntity {
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Villager.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
-        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Animal.class, true));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Animal.class, 10, true, false,
+                entity -> entity.getType().is(PREY)
+                        || Config.EXTRA_PREY.get().contains(
+                        BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString())));
     }
 
     public static AttributeSupplier.Builder setAttributes() {
@@ -163,6 +186,10 @@ public class LilithEntity extends Monster implements GeoEntity {
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
                 .add(Attributes.FOLLOW_RANGE, 64.0D);
     }
+
+    public static final TagKey<EntityType<?>> PREY = TagKey.create(
+            Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "lilith_prey"));
 
     @Override
     public void tick() {

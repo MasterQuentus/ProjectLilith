@@ -19,7 +19,39 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(BlockTags.MINEABLE_WITH_PICKAXE)
-                .add(ModBlocks.LILITH_TROPHY.get());
+                .add(ModBlocks.LILITH_TROPHY.get())
+                .add(ModBlocks.CRIMSON_STONE.get())
+                .add(ModBlocks.CRIMSON_COBBLESTONE.get())
+                .add(ModBlocks.CRIMSON_STONE_BRICKS.get())
+                .add(ModBlocks.POLISHED_CRIMSON_STONE.get())
+                .add(ModBlocks.CHISELED_CRIMSON_STONE.get())
+                .add(ModBlocks.CRACKED_CRIMSON_STONE.get())
+                .add(ModBlocks.CRIMSON_STONE_STAIRS.get())
+                .add(ModBlocks.CRIMSON_COBBLESTONE_STAIRS.get())
+                .add(ModBlocks.CRIMSON_STONE_BRICKS_STAIRS.get())
+                .add(ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get())
+                .add(ModBlocks.CRIMSON_STONE_SLAB.get())
+                .add(ModBlocks.CRIMSON_COBBLESTONE_SLAB.get())
+                .add(ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get())
+                .add(ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get())
+                .add(ModBlocks.CRIMSON_STONE_WALL.get())
+                .add(ModBlocks.CRIMSON_STONE_BUTTON.get())
+                .add(ModBlocks.CRIMSON_STONE_PRESSURE_PLATE.get());
+
+        tag(BlockTags.WALLS)
+                .add(ModBlocks.CRIMSON_STONE_WALL.get());
+
+        tag(BlockTags.SLABS)
+                .add(ModBlocks.CRIMSON_STONE_SLAB.get())
+                .add(ModBlocks.CRIMSON_COBBLESTONE_SLAB.get())
+                .add(ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get())
+                .add(ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get());
+
+        tag(BlockTags.STAIRS)
+                .add(ModBlocks.CRIMSON_STONE_STAIRS.get())
+                .add(ModBlocks.CRIMSON_COBBLESTONE_STAIRS.get())
+                .add(ModBlocks.CRIMSON_STONE_BRICKS_STAIRS.get())
+                .add(ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get());
 
         tag(BlockTags.FIRE)
                 .add(ModBlocks.HELLFIRE.get());

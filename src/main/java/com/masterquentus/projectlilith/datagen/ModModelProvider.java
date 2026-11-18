@@ -5,13 +5,13 @@ import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.item.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.*;
 import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
 import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredBlock;
 
 public class ModModelProvider {
 
@@ -28,6 +28,52 @@ public class ModModelProvider {
             );
 
             registerHellfireBlock(ModBlocks.HELLFIRE.get());
+
+            // Full Cube Blocks + BlockItems
+            blockWithItem(ModBlocks.CRIMSON_STONE);
+            blockWithItem(ModBlocks.CRIMSON_COBBLESTONE);
+            blockWithItem(ModBlocks.CRIMSON_STONE_BRICKS);
+            blockWithItem(ModBlocks.POLISHED_CRIMSON_STONE);
+            blockWithItem(ModBlocks.CHISELED_CRIMSON_STONE);
+            blockWithItem(ModBlocks.CRACKED_CRIMSON_STONE);
+
+            // Stairs
+            stairsBlock((StairBlock) ModBlocks.CRIMSON_STONE_STAIRS.get(), blockTexture(ModBlocks.CRIMSON_STONE.get()));
+            stairsBlock((StairBlock) ModBlocks.CRIMSON_COBBLESTONE_STAIRS.get(), blockTexture(ModBlocks.CRIMSON_COBBLESTONE.get()));
+            stairsBlock((StairBlock) ModBlocks.CRIMSON_STONE_BRICKS_STAIRS.get(), blockTexture(ModBlocks.CRIMSON_STONE_BRICKS.get()));
+            stairsBlock((StairBlock) ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get(), blockTexture(ModBlocks.POLISHED_CRIMSON_STONE.get()));
+
+            // Slabs
+            slabBlock((SlabBlock) ModBlocks.CRIMSON_STONE_SLAB.get(), blockTexture(ModBlocks.CRIMSON_STONE.get()), blockTexture(ModBlocks.CRIMSON_STONE.get()));
+            slabBlock((SlabBlock) ModBlocks.CRIMSON_COBBLESTONE_SLAB.get(), blockTexture(ModBlocks.CRIMSON_COBBLESTONE.get()), blockTexture(ModBlocks.CRIMSON_COBBLESTONE.get()));
+            slabBlock((SlabBlock) ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get(), blockTexture(ModBlocks.CRIMSON_STONE_BRICKS.get()), blockTexture(ModBlocks.CRIMSON_STONE_BRICKS.get()));
+            slabBlock((SlabBlock) ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get(), blockTexture(ModBlocks.POLISHED_CRIMSON_STONE.get()), blockTexture(ModBlocks.POLISHED_CRIMSON_STONE.get()));
+
+            // Wall, Button, Pressure Plate
+            wallBlock((WallBlock) ModBlocks.CRIMSON_STONE_WALL.get(), blockTexture(ModBlocks.CRIMSON_COBBLESTONE.get()));
+            buttonBlock((ButtonBlock) ModBlocks.CRIMSON_STONE_BUTTON.get(), blockTexture(ModBlocks.CRIMSON_STONE.get()));
+            pressurePlateBlock((PressurePlateBlock) ModBlocks.CRIMSON_STONE_PRESSURE_PLATE.get(), blockTexture(ModBlocks.CRIMSON_STONE.get()));
+
+            // BlockItems for Stairs, Slabs, and Pressure Plate
+            blockItem(ModBlocks.CRIMSON_STONE_STAIRS);
+            blockItem(ModBlocks.CRIMSON_COBBLESTONE_STAIRS);
+            blockItem(ModBlocks.CRIMSON_STONE_BRICKS_STAIRS);
+            blockItem(ModBlocks.POLISHED_CRIMSON_STONE_STAIRS);
+
+            blockItem(ModBlocks.CRIMSON_STONE_SLAB);
+            blockItem(ModBlocks.CRIMSON_COBBLESTONE_SLAB);
+            blockItem(ModBlocks.CRIMSON_STONE_BRICKS_SLAB);
+            blockItem(ModBlocks.POLISHED_CRIMSON_STONE_SLAB);
+
+            blockItem(ModBlocks.CRIMSON_STONE_PRESSURE_PLATE);
+        }
+
+        private void blockWithItem(DeferredBlock<?> deferredBlock) {
+            simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));
+        }
+
+        private void blockItem(DeferredBlock<?> deferredBlock) {
+            simpleBlockItem(deferredBlock.get(), new ModelFile.UncheckedModelFile(ProjectLilith.MOD_ID + ":block/" + deferredBlock.getId().getPath()));
         }
 
         private void registerHellfireBlock(Block hellfire) {
@@ -90,6 +136,13 @@ public class ModModelProvider {
             withExistingParent("flint_and_hellfire", "item/generated").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/flint_and_hellfire"));
             withExistingParent("hellfire_charge", "item/generated").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/hellfire_charge"));
             withExistingParent("crimson_fang", "item/handheld").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/crimson_fang"));
+
+            // Lilith Spawn Egg
+            withExistingParent("lilith_spawn_egg", mcLoc("item/template_spawn_egg"));
+
+            // Inventory models for Wall & Button
+            buttonInventory("crimson_stone_button", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "block/crimson_stone"));
+            wallInventory("crimson_stone_wall", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "block/crimson_cobblestone"));
         }
     }
 }

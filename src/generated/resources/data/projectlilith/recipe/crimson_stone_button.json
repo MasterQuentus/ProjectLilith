@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "S": {
+      "item": "projectlilith:crimson_stone"
+    }
+  },
+  "pattern": [
+    "S"
+  ],
+  "result": {
+    "count": 1,
+    "id": "projectlilith:crimson_stone_button"
+  }
+}

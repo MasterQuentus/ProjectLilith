@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "projectlilith:block/crimson_cobblestone"
+  }
+}
