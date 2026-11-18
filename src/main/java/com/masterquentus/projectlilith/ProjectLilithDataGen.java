@@ -36,8 +36,15 @@ public class ProjectLilithDataGen {
         // 3. Recipes
         generator.addProvider(event.includeServer(), new ModRecipeProvider(packOutput, lookupProvider));
 
-        // 4. Block Tags
-        generator.addProvider(event.includeServer(), new ModBlockTagsProvider(packOutput, lookupProvider, existingFileHelper));
+        // 4. Tags
+        ModBlockTagsProvider blockTags = new ModBlockTagsProvider(packOutput, lookupProvider, existingFileHelper);
+        generator.addProvider(event.includeServer(), blockTags);
+
+        generator.addProvider(event.includeServer(),
+                new ModItemTagsProvider(packOutput, lookupProvider, blockTags.contentsGetter(), existingFileHelper));
+
+        generator.addProvider(event.includeServer(),
+                new ModEntityTypeTagsProvider(packOutput, lookupProvider, existingFileHelper));
 
         // 5. Advancements (3 arguments only in 1.21.1)
         generator.addProvider(event.includeServer(), new net.minecraft.data.advancements.AdvancementProvider(

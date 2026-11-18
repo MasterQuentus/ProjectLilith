@@ -5,13 +5,11 @@ import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -20,9 +18,29 @@ public class ModRecipeProvider extends RecipeProvider {
         super(output, registries);
     }
 
+    /** Builds an id in OUR namespace. save(output, "string") would default to the minecraft namespace. */
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, path);
+    }
+
+    /** Stonecutter recipe saved under the mod namespace. */
+    private static void stonecut(RecipeOutput output, ItemLike result, ItemLike base, int count) {
+        SingleItemRecipeBuilder.stonecutting(Ingredient.of(base), RecipeCategory.BUILDING_BLOCKS, result, count)
+                .unlockedBy(getHasName(base), has(base))
+                .save(output, id(getItemName(result) + "_from_" + getItemName(base) + "_stonecutting"));
+    }
+
+    private static void smelt(RecipeOutput output, ItemLike input, ItemLike result, String name) {
+        SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.BUILDING_BLOCKS, result, 0.1F, 200)
+                .unlockedBy(getHasName(input), has(input))
+                .save(output, id(name));
+    }
+
     @Override
     protected void buildRecipes(RecipeOutput output) {
-        // 1. Shapeless recipe to craft the Hellfire Charge from vanilla items
+        // ------------------------------------------------------------------
+        // Ritual items
+        // ------------------------------------------------------------------
         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.HELLFIRE_CHARGE.get())
                 .requires(Items.FIRE_CHARGE)
                 .requires(Items.GUNPOWDER)
@@ -30,17 +48,30 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(Items.FIRE_CHARGE), has(Items.FIRE_CHARGE))
                 .save(output);
 
-        // 2. Shaped recipe to craft the Flint and Hellfire summoning item
         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.FLINT_AND_HELLFIRE.get())
                 .pattern("H")
                 .pattern("F")
                 .define('H', ModItems.HELLFIRE_CHARGE.get())
                 .define('F', Items.FLINT)
-                .unlockedBy(getHasName(ModItems.HELLFIRE_CHARGE.get()), has(ModItems.HELLFIRE_CHARGE))
+                .unlockedBy(getHasName(ModItems.HELLFIRE_CHARGE.get()), has(ModItems.HELLFIRE_CHARGE.get()))
                 .save(output);
 
-        // 3. Crimson Stone Building Blocks Recipes
-        // Stone Bricks from Crimson Stone
+        // ------------------------------------------------------------------
+        // How players GET Crimson Stone
+        // 4 Netherrack + 1 Blaze Powder -> 4 Crimson Cobblestone, then smelt for Crimson Stone
+        // ------------------------------------------------------------------
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CRIMSON_COBBLESTONE.get(), 4)
+                .requires(Items.NETHERRACK, 4)
+                .requires(Items.BLAZE_POWDER)
+                .unlockedBy(getHasName(Items.NETHERRACK), has(Items.NETHERRACK))
+                .save(output, id("crimson_cobblestone_from_netherrack"));
+
+        smelt(output, ModBlocks.CRIMSON_COBBLESTONE.get(), ModBlocks.CRIMSON_STONE.get(), "crimson_stone_from_smelting");
+
+        // ------------------------------------------------------------------
+        // Crimson Stone variants (vanilla-style)
+        // ------------------------------------------------------------------
+        // Bricks: 4 Crimson Stone -> 4 Bricks
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CRIMSON_STONE_BRICKS.get(), 4)
                 .pattern("SS")
                 .pattern("SS")
@@ -48,26 +79,28 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE.get()), has(ModBlocks.CRIMSON_STONE.get()))
                 .save(output);
 
-        // Polished Crimson Stone from Crimson Stone
+        // Polished: 4 Crimson Stone -> 4 Polished (was using bricks before, now matches vanilla)
         ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CRIMSON_STONE.get(), 4)
                 .pattern("SS")
                 .pattern("SS")
-                .define('S', ModBlocks.CRIMSON_STONE_BRICKS.get())
-                .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE_BRICKS.get()), has(ModBlocks.CRIMSON_STONE_BRICKS.get()))
-                .save(output, "polished_crimson_stone_from_bricks");
+                .define('S', ModBlocks.CRIMSON_STONE.get())
+                .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE.get()), has(ModBlocks.CRIMSON_STONE.get()))
+                .save(output);
 
-        // Chiseled Crimson Stone from Slabs
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_CRIMSON_STONE.get(), 1)
+        // Cracked: smelt Bricks
+        smelt(output, ModBlocks.CRIMSON_STONE_BRICKS.get(), ModBlocks.CRACKED_CRIMSON_STONE.get(), "cracked_crimson_stone_from_smelting");
+
+        // Chiseled: 2 Crimson Stone Slabs
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, ModBlocks.CHISELED_CRIMSON_STONE.get())
                 .pattern("S")
                 .pattern("S")
                 .define('S', ModBlocks.CRIMSON_STONE_SLAB.get())
                 .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE_SLAB.get()), has(ModBlocks.CRIMSON_STONE_SLAB.get()))
                 .save(output);
 
-        // Correct way for Buttons and Pressure Plates (using ShapedRecipeBuilder)
-        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.CRIMSON_STONE_BUTTON.get())
-                .pattern("S")
-                .define('S', ModBlocks.CRIMSON_STONE.get())
+        // Button and Pressure Plate
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.REDSTONE, ModBlocks.CRIMSON_STONE_BUTTON.get())
+                .requires(ModBlocks.CRIMSON_STONE.get())
                 .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE.get()), has(ModBlocks.CRIMSON_STONE.get()))
                 .save(output);
 
@@ -77,7 +110,9 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE.get()), has(ModBlocks.CRIMSON_STONE.get()))
                 .save(output);
 
-        // Stairs, Slabs, Walls, Buttons, and Pressure Plates
+        // ------------------------------------------------------------------
+        // Stairs, slabs, wall (crafting table)
+        // ------------------------------------------------------------------
         stairBuilder(ModBlocks.CRIMSON_STONE_STAIRS.get(), Ingredient.of(ModBlocks.CRIMSON_STONE.get()))
                 .unlockedBy(getHasName(ModBlocks.CRIMSON_STONE.get()), has(ModBlocks.CRIMSON_STONE.get())).save(output);
         slab(output, RecipeCategory.BUILDING_BLOCKS, ModBlocks.CRIMSON_STONE_SLAB.get(), ModBlocks.CRIMSON_STONE.get());
@@ -95,5 +130,32 @@ public class ModRecipeProvider extends RecipeProvider {
                 .unlockedBy(getHasName(ModBlocks.POLISHED_CRIMSON_STONE.get()), has(ModBlocks.POLISHED_CRIMSON_STONE.get())).save(output);
         slab(output, RecipeCategory.BUILDING_BLOCKS, ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get(), ModBlocks.POLISHED_CRIMSON_STONE.get());
 
+        // ------------------------------------------------------------------
+        // Stonecutter
+        // ------------------------------------------------------------------
+        // From Crimson Stone
+        stonecut(output, ModBlocks.CRIMSON_STONE_BRICKS.get(), ModBlocks.CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE.get(), ModBlocks.CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.CHISELED_CRIMSON_STONE.get(), ModBlocks.CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.CRIMSON_STONE_STAIRS.get(), ModBlocks.CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.CRIMSON_STONE_SLAB.get(), ModBlocks.CRIMSON_STONE.get(), 2);
+        stonecut(output, ModBlocks.CRIMSON_STONE_BRICKS_STAIRS.get(), ModBlocks.CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get(), ModBlocks.CRIMSON_STONE.get(), 2);
+        stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get(), ModBlocks.CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get(), ModBlocks.CRIMSON_STONE.get(), 2);
+
+        // From Crimson Cobblestone
+        stonecut(output, ModBlocks.CRIMSON_COBBLESTONE_STAIRS.get(), ModBlocks.CRIMSON_COBBLESTONE.get(), 1);
+        stonecut(output, ModBlocks.CRIMSON_COBBLESTONE_SLAB.get(), ModBlocks.CRIMSON_COBBLESTONE.get(), 2);
+        stonecut(output, ModBlocks.CRIMSON_STONE_WALL.get(), ModBlocks.CRIMSON_COBBLESTONE.get(), 1);
+
+        // From Crimson Stone Bricks
+        stonecut(output, ModBlocks.CHISELED_CRIMSON_STONE.get(), ModBlocks.CRIMSON_STONE_BRICKS.get(), 1);
+        stonecut(output, ModBlocks.CRIMSON_STONE_BRICKS_STAIRS.get(), ModBlocks.CRIMSON_STONE_BRICKS.get(), 1);
+        stonecut(output, ModBlocks.CRIMSON_STONE_BRICKS_SLAB.get(), ModBlocks.CRIMSON_STONE_BRICKS.get(), 2);
+
+        // From Polished Crimson Stone
+        stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get(), ModBlocks.POLISHED_CRIMSON_STONE.get(), 1);
+        stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get(), ModBlocks.POLISHED_CRIMSON_STONE.get(), 2);
     }
 }

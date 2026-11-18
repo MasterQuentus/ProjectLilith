@@ -1,0 +1,16 @@
+{
+  "values": [
+    "minecraft:skeleton",
+    "minecraft:wither_skeleton",
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:evoker",
+    "minecraft:stray",
+    "minecraft:bogged",
+    "minecraft:pillager",
+    "minecraft:breeze",
+    "minecraft:vindicator",
+    "minecraft:witch"
+  ]
+}

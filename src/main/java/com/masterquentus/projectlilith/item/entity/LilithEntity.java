@@ -90,6 +90,15 @@ public class LilithEntity extends Monster implements GeoEntity {
     public LilithEntity(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         this.xpReward = 500;
+        if (!level.isClientSide()) {
+            applyConfigAttributes();
+            this.setHealth(this.getMaxHealth());
+        }
+    }
+
+    private void applyConfigAttributes() {
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.LILITH_MAX_HEALTH.get());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Config.LILITH_ATTACK_DAMAGE.get());
     }
 
     public enum BossPhase {
@@ -135,6 +144,7 @@ public class LilithEntity extends Monster implements GeoEntity {
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
+        if (!level().isClientSide()) applyConfigAttributes();
 
         // Ability state isn't saved, so clear what an interrupted ability left behind
         this.setNoAi(false);
@@ -190,6 +200,17 @@ public class LilithEntity extends Monster implements GeoEntity {
     public static final TagKey<EntityType<?>> PREY = TagKey.create(
             Registries.ENTITY_TYPE,
             ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "lilith_prey"));
+
+    public static final TagKey<EntityType<?>> DOMINION_MINIONS = TagKey.create(
+            Registries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "dark_dominion_minions"));
+
+    private EntityType<?> pickMinionType() {
+        List<EntityType<?>> pool = new ArrayList<>();
+        BuiltInRegistries.ENTITY_TYPE.getTag(DOMINION_MINIONS)
+                .ifPresent(tag -> tag.forEach(holder -> pool.add(holder.value())));
+        return pool.isEmpty() ? EntityType.ZOMBIE : pool.get(random.nextInt(pool.size()));
+    }
 
     @Override
     public void tick() {
@@ -548,37 +569,22 @@ public class LilithEntity extends Monster implements GeoEntity {
         AABB area = new AABB(blockPosition()).inflate(12);
         List<Player> nearbyPlayers = level().getEntitiesOfClass(Player.class, area);
 
-        for (int i = 0; i < 11; i++) {
-            EntityType<? extends Monster> type = switch (random.nextInt(13)) {
-                case 0 -> EntityType.SKELETON;
-                case 1 -> EntityType.WITHER_SKELETON;
-                case 2 -> EntityType.ZOMBIE;
-                case 3 -> EntityType.HUSK;
-                case 4 -> EntityType.DROWNED;
-                case 5 -> EntityType.EVOKER;
-                case 6 -> EntityType.STRAY;
-                case 7 -> EntityType.BOGGED;
-                case 8 -> EntityType.PILLAGER;
-                case 9 -> EntityType.BREEZE;
-                case 10 -> EntityType.VINDICATOR;
-                default -> EntityType.WITCH;
-            };
+        int count = Config.DOMINION_MINIONS_PER_WAVE.get();
+        for (int i = 0; i < count; i++) {
+            if (!(pickMinionType().create(level()) instanceof Monster mob)) continue;
 
-            Monster mob = type.create(level());
-            if (mob != null) {
-                double xOff = random.nextDouble() * 6 - 3;
-                double zOff = random.nextDouble() * 6 - 3;
+            double xOff = random.nextDouble() * 6 - 3;
+            double zOff = random.nextDouble() * 6 - 3;
 
-                mob.setPos(getX() + xOff, getY(), getZ() + zOff);
-                mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.COMMAND, null);
+            mob.setPos(getX() + xOff, getY(), getZ() + zOff);
+            mob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(mob.blockPosition()), MobSpawnType.COMMAND, null);
 
-                if (!nearbyPlayers.isEmpty()) {
-                    mob.setTarget(nearbyPlayers.get(random.nextInt(nearbyPlayers.size())));
-                }
-
-                level().addFreshEntity(mob);
-                darkDominionMinions.add(mob);
+            if (!nearbyPlayers.isEmpty()) {
+                mob.setTarget(nearbyPlayers.get(random.nextInt(nearbyPlayers.size())));
             }
+
+            level().addFreshEntity(mob);
+            darkDominionMinions.add(mob);
         }
     }
 

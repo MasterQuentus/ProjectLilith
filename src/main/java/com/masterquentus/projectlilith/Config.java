@@ -29,6 +29,22 @@ public class Config {
             .comment("Dimensions where Hellfire can exist, as dimension IDs. Leave empty to allow it everywhere.")
             .defineListAllowEmpty("hellfireDimensions", List.of(), () -> "", Config::isEntityId);
 
+    public static final ModConfigSpec.IntValue SUMMON_EXCLUSION_RADIUS = BUILDER
+            .comment("Lilith cannot be summoned if another awake Lilith is within this many blocks. 0 disables the check.")
+            .defineInRange("summonExclusionRadius", 64, 0, 512);
+
+    public static final ModConfigSpec.BooleanValue HELLFIRE_SPREADS = BUILDER
+            .comment("If false, Hellfire will not spread to neighbouring blocks.")
+            .define("hellfireSpreads", true);
+
+    public static final ModConfigSpec.DoubleValue LILITH_ARMOR = BUILDER
+            .comment("Lilith's armor value")
+            .defineInRange("lilithArmor", 10.0, 0.0, 30.0);
+
+    public static final ModConfigSpec.IntValue DOMINION_COOLDOWN_TICKS = BUILDER
+            .comment("Ticks between Dark Dominion waves (20 ticks = 1 second)")
+            .defineInRange("dominionCooldownTicks", 600, 20, 72000);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private static boolean isEntityId(final Object obj) {

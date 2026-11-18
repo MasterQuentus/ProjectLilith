@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_crimson_cobblestone": {
+      "conditions": {
+        "items": [
+          {
+            "items": "projectlilith:crimson_cobblestone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "projectlilith:crimson_cobblestone_slab_from_crimson_cobblestone_stonecutting"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_crimson_cobblestone"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "projectlilith:crimson_cobblestone_slab_from_crimson_cobblestone_stonecutting"
+    ]
+  }
+}

@@ -5,6 +5,7 @@ import com.masterquentus.projectlilith.block.ModBlocks;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
@@ -55,5 +56,23 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
 
         tag(BlockTags.FIRE)
                 .add(ModBlocks.HELLFIRE.get());
+
+        tag(BlockTags.BUTTONS).add(ModBlocks.CRIMSON_STONE_BUTTON.get());
+        tag(BlockTags.STONE_BUTTONS).add(ModBlocks.CRIMSON_STONE_BUTTON.get());
+        tag(BlockTags.PRESSURE_PLATES).add(ModBlocks.CRIMSON_STONE_PRESSURE_PLATE.get());
+        tag(BlockTags.STONE_PRESSURE_PLATES).add(ModBlocks.CRIMSON_STONE_PRESSURE_PLATE.get());
+        tag(Tags.Blocks.COBBLESTONES).add(ModBlocks.CRIMSON_COBBLESTONE.get());
+        tag(Tags.Blocks.STONES).add(ModBlocks.CRIMSON_STONE.get());
+
+        // Stone categorization & Redstone
+        tag(BlockTags.STONE_BRICKS).add(ModBlocks.CRIMSON_STONE_BRICKS.get());
+        tag(BlockTags.STONE_BUTTONS).add(ModBlocks.CRIMSON_STONE_BUTTON.get());
+        tag(BlockTags.BUTTONS).add(ModBlocks.CRIMSON_STONE_BUTTON.get());
+        tag(BlockTags.PRESSURE_PLATES).add(ModBlocks.CRIMSON_STONE_PRESSURE_PLATE.get());
+
+// Ore replacement (allows ores to embed in your custom stone)
+        tag(BlockTags.STONE_ORE_REPLACEABLES)
+                .add(ModBlocks.CRIMSON_STONE.get())
+                .add(ModBlocks.CRIMSON_COBBLESTONE.get());
     }
 }
