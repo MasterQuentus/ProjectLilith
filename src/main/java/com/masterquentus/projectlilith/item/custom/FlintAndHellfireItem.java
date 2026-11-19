@@ -1,5 +1,6 @@
 package com.masterquentus.projectlilith.item.custom;
 
+import com.masterquentus.projectlilith.Config;
 import com.masterquentus.projectlilith.ProjectLilith;
 import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.entity.ModEntities;
@@ -63,16 +64,20 @@ public class FlintAndHellfireItem extends Item {
         Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
 
-        // 1. Summon Lilith if clicked directly on Netherrack
-        if (serverLevel.getBlockState(pos).is(Blocks.NETHERRACK)) {
+        // 1. Summon Lilith if clicked directly on a ritual block (tag, default: Netherrack)
+        if (serverLevel.getBlockState(pos).is(SUMMON_BLOCKS)) {
             BlockPos spawnPos = pos.above();
-            AABB area = new AABB(spawnPos).inflate(64);
-            if (!serverLevel.getEntitiesOfClass(LilithEntity.class, area).isEmpty()) {
-                if (player != null) {
-                    player.displayClientMessage(
-                            Component.literal("Lilith is already awake nearby.").withStyle(ChatFormatting.DARK_RED), true);
+
+            int radius = Config.SUMMON_EXCLUSION_RADIUS.get();
+            if (radius > 0) {
+                AABB area = new AABB(spawnPos).inflate(radius);
+                if (!serverLevel.getEntitiesOfClass(LilithEntity.class, area).isEmpty()) {
+                    if (player != null) {
+                        player.displayClientMessage(
+                                Component.literal("Lilith is already awake nearby.").withStyle(ChatFormatting.DARK_RED), true);
+                    }
+                    return InteractionResult.FAIL;
                 }
-                return InteractionResult.FAIL;
             }
 
             // Spawn the visual lightning bolt (1.21.1 EntityType.create signature)

@@ -91,18 +91,7 @@ public class HellfireBlock extends FireBlock {
         super.entityInside(state, level, pos, entity);
         entity.hurt(level.damageSources().cactus(), 1.0F);
         entity.igniteForSeconds(1.0F);
-    }
 
-    // Only allow it to exist in the Underworld dimension
-    @Override
-    public void onNeighborChange(BlockState state, LevelReader reader, BlockPos pos, BlockPos neighbor) {
-        if (reader instanceof Level level) {
-            ResourceKey<Level> currentDim = level.dimension();
-            if (!currentDim.location().getPath().equals("underworlddim")) {
-                // Replace with air if not in the underworld
-                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-            }
-        }
     }
 
     @Override

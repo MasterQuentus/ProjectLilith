@@ -73,6 +73,7 @@ public class LilithEntity extends Monster implements GeoEntity {
     private boolean isAttacking = false;
     private int attackTimer = 0;
     private int attackType = 1;
+    private int noPlayerTicks = 0;
 
     // Transformation fields
     private boolean isTransformed = false;
@@ -99,6 +100,7 @@ public class LilithEntity extends Monster implements GeoEntity {
     private void applyConfigAttributes() {
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.LILITH_MAX_HEALTH.get());
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Config.LILITH_ATTACK_DAMAGE.get());
+        this.getAttribute(Attributes.ARMOR).setBaseValue(Config.LILITH_ARMOR.get());
     }
 
     public enum BossPhase {
@@ -180,9 +182,10 @@ public class LilithEntity extends Monster implements GeoEntity {
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Villager.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Animal.class, 10, true, false,
-                entity -> entity.getType().is(PREY)
+                entity -> !(entity instanceof TamableAnimal t && t.isTame())
+                        && (entity.getType().is(PREY)
                         || Config.EXTRA_PREY.get().contains(
-                        BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString())));
+                        BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType()).toString()))));
     }
 
     public static AttributeSupplier.Builder setAttributes() {
@@ -226,6 +229,10 @@ public class LilithEntity extends Monster implements GeoEntity {
         if (healthPercent <= BossPhase.VOID_EMPRESS.healthThreshold) currentPhase = BossPhase.VOID_EMPRESS;
         else if (healthPercent <= BossPhase.BLOOD_QUEEN.healthThreshold) currentPhase = BossPhase.BLOOD_QUEEN;
         else if (healthPercent <= BossPhase.SHADOW_VEIL.healthThreshold) currentPhase = BossPhase.SHADOW_VEIL;
+
+        if (!isUsingDarkDominion && !isTransformed && tickCount % 20 == 0 && nearbyPlayers().isEmpty()) {
+            this.heal(this.getMaxHealth() * 0.02F);  // 2% per second, about 50 seconds to full
+        }
 
         hellfireSpinTick++;
         if (!spinningFireballUUIDs.isEmpty() && spinningFireballs.isEmpty()) {
@@ -273,6 +280,23 @@ public class LilithEntity extends Monster implements GeoEntity {
 
         if (isUsingDarkDominion) {
             abilityPhaseTimer--;
+            if (tickCount % 20 == 0 && nearbyPlayers().isEmpty()) {
+                noPlayerTicks++;
+            } else if (!nearbyPlayers().isEmpty()) {
+                noPlayerTicks = 0;
+            }
+            if (noPlayerTicks >= 10) { // ~10 seconds with nobody near
+                for (Monster m : darkDominionMinions) m.discard();
+                darkDominionMinions.clear();
+                isUsingDarkDominion = false;
+                this.setNoAi(false);
+                this.setInvulnerable(false);
+                darkDominionRounds = 0;
+                darkDominionCooldown = Config.DOMINION_COOLDOWN_TICKS.get();
+                noPlayerTicks = 0;
+                this.setHealth(this.getMaxHealth());
+                return;
+            }
             darkDominionMinions.removeIf(mob -> mob.isRemoved() || !mob.isAlive());
             double targetY = startingY + MAX_FLOAT_HEIGHT;
             if (this.getY() < targetY) {
@@ -289,7 +313,7 @@ public class LilithEntity extends Monster implements GeoEntity {
                     this.setNoAi(false);
                     this.setInvulnerable(false);
                     darkDominionRounds = 0;
-                    darkDominionCooldown = 2000;
+                    darkDominionCooldown = Config.DOMINION_COOLDOWN_TICKS.get();   // was 2000
                     Player p = level().getNearestPlayer(this, 32);
                     if (p != null) this.setTarget(p);
                 } else {
@@ -379,7 +403,7 @@ public class LilithEntity extends Monster implements GeoEntity {
                     .append(Component.literal("uses ").withStyle(ChatFormatting.GRAY))
                     .append(Component.literal(abilityName).withStyle(ChatFormatting.RED, ChatFormatting.BOLD))
                     .append(Component.literal("!").withStyle(ChatFormatting.GRAY));
-            for (Player player : level().players()) {
+            for (Player player : nearbyPlayers()) {
                 player.sendSystemMessage(msg);
             }
         }
@@ -403,7 +427,7 @@ public class LilithEntity extends Monster implements GeoEntity {
 
     private void applyBloodMoonCurse(LivingEntity entity) {
         if (!level().isClientSide() && bloodMoonCooldown == 0) {
-            for (Player player : level().players()) {
+            for (Player player : nearbyPlayers()) {
                 player.addEffect(new MobEffectInstance(MobEffects.WITHER, 400, 1));
                 player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 1));
             }
@@ -521,20 +545,10 @@ public class LilithEntity extends Monster implements GeoEntity {
 
         @Override
         public void die(DamageSource source) {
-            if (!level().isClientSide()) {
-                ServerLevel serverLevel = (ServerLevel) level();
-                this.spawnAtLocation(new ItemStack(ModItems.LILITH_SOUL.get()));
-
-                float roll = random.nextFloat();
-                if (roll < 0.15f) {
-                    this.spawnAtLocation(new ItemStack(ModItems.CRIMSON_FANG.get()));
-                } else if (roll < 0.50f) {
-                    this.spawnAtLocation(new ItemStack(ModBlocks.LILITH_TROPHY.get()));
-                } else {
-                    this.spawnAtLocation(new ItemStack(ModItems.LILITH_CONTRACT.get()));
-                }
-            }
             super.die(source);
+            if (!level().isClientSide()) {
+                owner.notifyBatDeath(this);
+            }
         }
     }
 
@@ -546,6 +560,7 @@ public class LilithEntity extends Monster implements GeoEntity {
     private void applyDarkDominion(LivingEntity entity) {
         if (!level().isClientSide() && !isUsingDarkDominion) {
             isUsingDarkDominion = true;
+            noPlayerTicks = 0;
             startingY = this.getY();
 
             this.setNoAi(true);
@@ -604,7 +619,7 @@ public class LilithEntity extends Monster implements GeoEntity {
 
     private void triggerDarkVeil(LivingEntity entity) {
         if (!level().isClientSide() && darkVeilCooldown == 0) {
-            for (Player player : level().players()) {
+            for (Player player : nearbyPlayers()) {
                 player.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 200, 0));
                 player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 0));
             }

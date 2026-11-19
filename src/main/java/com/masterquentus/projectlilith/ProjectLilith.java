@@ -4,6 +4,7 @@ import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.creativemodtab.ModCreativeModTabs;
 import com.masterquentus.projectlilith.entity.ModEntities;
 import com.masterquentus.projectlilith.item.ModItems;
+import com.masterquentus.projectlilith.item.armor.ModArmorMaterials;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -30,6 +31,7 @@ public class ProjectLilith {
 
         ModItems.register(modEventBus);
         ModBlocks.register(modEventBus);
+        ModArmorMaterials.register(modEventBus);
         ModEntities.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in

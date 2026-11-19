@@ -30,6 +30,10 @@ public class ModCreativeModTabs {
                         output.accept(ModItems.FLINT_AND_HELLFIRE.get());
                         output.accept(ModItems.HELLFIRE_CHARGE.get());
                         output.accept(ModItems.CRIMSON_FANG.get());
+                        output.accept(ModItems.ABYSSAL_HELMET.get());
+                        output.accept(ModItems.ABYSSAL_CHESTPLATE.get());
+                        output.accept(ModItems.ABYSSAL_LEGGINGS.get());
+                        output.accept(ModItems.ABYSSAL_BOOTS.get());
 
                         // The upgraded Crimson Fang
                         ItemStack upgraded = new ItemStack(ModItems.CRIMSON_FANG.get());

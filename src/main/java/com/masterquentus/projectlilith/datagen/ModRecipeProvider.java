@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -34,6 +35,18 @@ public class ModRecipeProvider extends RecipeProvider {
         SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.BUILDING_BLOCKS, result, 0.1F, 200)
                 .unlockedBy(getHasName(input), has(input))
                 .save(output, id(name));
+    }
+
+    private void armorUpgrade(RecipeOutput output, Item netheritePiece, Item result) {
+        SmithingTransformRecipeBuilder.smithing(
+                        Ingredient.of(ModItems.HELLFIRE_CHARGE.get()),
+                        Ingredient.of(netheritePiece),
+                        Ingredient.of(ModItems.LILITH_SOUL.get()),
+                        RecipeCategory.COMBAT,
+                        result)
+                .unlocks("has_lilith_soul", has(ModItems.LILITH_SOUL.get()))
+                .save(output, ResourceLocation.fromNamespaceAndPath(
+                        ProjectLilith.MOD_ID, getItemName(result) + "_smithing"));
     }
 
     @Override
@@ -157,5 +170,10 @@ public class ModRecipeProvider extends RecipeProvider {
         // From Polished Crimson Stone
         stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE_STAIRS.get(), ModBlocks.POLISHED_CRIMSON_STONE.get(), 1);
         stonecut(output, ModBlocks.POLISHED_CRIMSON_STONE_SLAB.get(), ModBlocks.POLISHED_CRIMSON_STONE.get(), 2);
+
+        armorUpgrade(output, Items.NETHERITE_HELMET,     ModItems.ABYSSAL_HELMET.get());
+        armorUpgrade(output, Items.NETHERITE_CHESTPLATE, ModItems.ABYSSAL_CHESTPLATE.get());
+        armorUpgrade(output, Items.NETHERITE_LEGGINGS,   ModItems.ABYSSAL_LEGGINGS.get());
+        armorUpgrade(output, Items.NETHERITE_BOOTS,      ModItems.ABYSSAL_BOOTS.get());
     }
 }

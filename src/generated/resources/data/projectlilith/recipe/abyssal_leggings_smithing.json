@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "projectlilith:lilith_soul"
+  },
+  "base": {
+    "item": "minecraft:netherite_leggings"
+  },
+  "result": {
+    "count": 1,
+    "id": "projectlilith:abyssal_leggings"
+  },
+  "template": {
+    "item": "projectlilith:hellfire_charge"
+  }
+}
