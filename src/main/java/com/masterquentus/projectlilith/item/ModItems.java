@@ -3,9 +3,7 @@ package com.masterquentus.projectlilith.item;
 import com.masterquentus.projectlilith.ProjectLilith;
 import com.masterquentus.projectlilith.entity.ModEntities;
 import com.masterquentus.projectlilith.item.armor.ModArmorMaterials;
-import com.masterquentus.projectlilith.item.custom.CrimsonFang;
-import com.masterquentus.projectlilith.item.custom.FlintAndHellfireItem;
-import com.masterquentus.projectlilith.item.custom.HellfireChargeItem;
+import com.masterquentus.projectlilith.item.custom.*;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tiers;
@@ -17,7 +15,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public class ModItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(ProjectLilith.MOD_ID);
 
-    public static final DeferredItem<Item> LILITH_CONTRACT = ITEMS.registerSimpleItem("lilith_contract");
+    public static final DeferredItem<Item> LILITH_CONTRACT = ITEMS.registerItem("lilith_contract", LilithContractItem::new);
 
     public static final DeferredItem<Item> LILITH_SOUL = ITEMS.registerSimpleItem("lilith_soul");
 
@@ -34,19 +32,19 @@ public class ModItems {
                     props -> new CrimsonFang(Tiers.NETHERITE, 3, -2.4F, props));
 
     public static final DeferredItem<ArmorItem> ABYSSAL_HELMET = ITEMS.registerItem("abyssal_helmet",
-            props -> new ArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.HELMET,
+            props -> new AbyssalArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.HELMET,
                     props.fireResistant().durability(ArmorItem.Type.HELMET.getDurability(37))));
 
     public static final DeferredItem<ArmorItem> ABYSSAL_CHESTPLATE = ITEMS.registerItem("abyssal_chestplate",
-            props -> new ArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.CHESTPLATE,
+            props -> new AbyssalArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.CHESTPLATE,
                     props.fireResistant().durability(ArmorItem.Type.CHESTPLATE.getDurability(37))));
 
     public static final DeferredItem<ArmorItem> ABYSSAL_LEGGINGS = ITEMS.registerItem("abyssal_leggings",
-            props -> new ArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.LEGGINGS,
+            props -> new AbyssalArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.LEGGINGS,
                     props.fireResistant().durability(ArmorItem.Type.LEGGINGS.getDurability(37))));
 
     public static final DeferredItem<ArmorItem> ABYSSAL_BOOTS = ITEMS.registerItem("abyssal_boots",
-            props -> new ArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.BOOTS,
+            props -> new AbyssalArmorItem(ModArmorMaterials.ABYSSAL, ArmorItem.Type.BOOTS,
                     props.fireResistant().durability(ArmorItem.Type.BOOTS.getDurability(37))));
 
     public static final DeferredItem<Item> LILITH_SPAWN_EGG = ITEMS.register("lilith_spawn_egg",

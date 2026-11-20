@@ -34,7 +34,7 @@ public class ModArmorMaterials {
                     SoundEvents.ARMOR_EQUIP_NETHERITE,
                     () -> Ingredient.of(ModItems.LILITH_SOUL.get()),   // anvil repair item
                     List.of(new ArmorMaterial.Layer(
-                            ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "blood_queen"))),
+                            ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "abyssal"))),
                     3.0F,                                  // toughness
                     0.1F));                                // knockback resistance
 

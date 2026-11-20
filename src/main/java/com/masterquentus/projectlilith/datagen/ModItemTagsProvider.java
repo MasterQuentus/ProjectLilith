@@ -1,6 +1,7 @@
 package com.masterquentus.projectlilith.datagen;
 
 import com.masterquentus.projectlilith.ProjectLilith;
+import com.masterquentus.projectlilith.item.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
@@ -26,5 +27,18 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         copy(BlockTags.WALLS, ItemTags.WALLS);
         copy(BlockTags.BUTTONS, ItemTags.BUTTONS);
         copy(BlockTags.STONE_BUTTONS, ItemTags.STONE_BUTTONS);
+
+
+        tag(ItemTags.TRIMMABLE_ARMOR)
+                .add(ModItems.ABYSSAL_HELMET.get())
+                .add(ModItems.ABYSSAL_CHESTPLATE.get())
+                .add(ModItems.ABYSSAL_LEGGINGS.get())
+                .add(ModItems.ABYSSAL_BOOTS.get());
+
+        tag(ItemTags.HEAD_ARMOR).add(ModItems.ABYSSAL_HELMET.get());
+        tag(ItemTags.CHEST_ARMOR).add(ModItems.ABYSSAL_CHESTPLATE.get());
+        tag(ItemTags.LEG_ARMOR).add(ModItems.ABYSSAL_LEGGINGS.get());
+        tag(ItemTags.FOOT_ARMOR).add(ModItems.ABYSSAL_BOOTS.get());
+
     }
 }

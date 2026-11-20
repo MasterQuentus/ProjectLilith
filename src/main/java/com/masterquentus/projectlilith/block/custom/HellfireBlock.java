@@ -1,6 +1,7 @@
 package com.masterquentus.projectlilith.block.custom;
 
 import com.masterquentus.projectlilith.Config;
+import com.masterquentus.projectlilith.item.armor.ArmorSetBonuses;
 import com.masterquentus.projectlilith.item.entity.LilithEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -11,6 +12,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -85,13 +87,12 @@ public class HellfireBlock extends FireBlock {
 
     @Override
     protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        // Don't burn Lilith or her bats with her own fire
         if (entity instanceof LilithEntity || entity instanceof LilithEntity.LilithBat) return;
+        if (entity instanceof LivingEntity le && ArmorSetBonuses.hasLegsAndBoots(le)) return;   // before super
 
         super.entityInside(state, level, pos, entity);
         entity.hurt(level.damageSources().cactus(), 1.0F);
         entity.igniteForSeconds(1.0F);
-
     }
 
     @Override

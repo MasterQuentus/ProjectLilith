@@ -36,6 +36,10 @@
 
   "creativetab.projectlilith_items": "Project Lilith",
 
+  "key.categories.projectlilith": "Project Lilith",
+  "key.projectlilith.orb_toggle": "Hellfire Orbs: Summon / Dismiss",
+  "key.projectlilith.orb_fire": "Hellfire Orbs: Fire",
+
   "advancements.projectlilith.use_flint_and_hellfire.title": "Flint and Hellfire",
   "advancements.projectlilith.use_flint_and_hellfire.description": "Craft and ignite the path using Flint and Hellfire.",
   "advancements.projectlilith.awakening_darkness.title": "Awakening the Darkness",

@@ -46,6 +46,7 @@ import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.animation.AnimationController;
 import software.bernie.geckolib.animation.RawAnimation;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import software.bernie.geckolib.animation.PlayState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,10 +71,12 @@ public class LilithEntity extends Monster implements GeoEntity {
     private int hellfireSpinTick = 0;
     private final List<Entity> spinningFireballs = new ArrayList<>();
 
+    // Server-side only: while true she will not start another ability (about 1 second after a cast)
     private boolean isAttacking = false;
     private int attackTimer = 0;
-    private int attackType = 1;
     private int noPlayerTicks = 0;
+    // Minion UUIDs read from a save; resolved back into darkDominionMinions once they have loaded
+    private final List<UUID> pendingMinionUUIDs = new ArrayList<>();
 
     // Transformation fields
     private boolean isTransformed = false;
@@ -87,6 +90,8 @@ public class LilithEntity extends Monster implements GeoEntity {
     private static final RawAnimation ATTACK2_ANIM = RawAnimation.begin().thenPlay("animation.lilith.attack2");
     private static final RawAnimation ATTACK3_ANIM = RawAnimation.begin().thenPlay("animation.lilith.attack3");
     private static final RawAnimation IDLE_ANIM = RawAnimation.begin().thenLoop("animation.lilith.idle");
+    // If you add animation.lilith.run in Blockbench, uncomment this and the line in registerControllers:
+    // private static final RawAnimation RUN_ANIM = RawAnimation.begin().thenLoop("animation.lilith.run");
 
     public LilithEntity(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
@@ -141,6 +146,24 @@ public class LilithEntity extends Monster implements GeoEntity {
             }
             compound.put("SpinningFireballs", listTag);
         }
+
+        // Dark Dominion is saved, so logging out and back in does not cancel it
+        compound.putBoolean("UsingDarkDominion", isUsingDarkDominion);
+        if (isUsingDarkDominion) {
+            compound.putInt("DominionRounds", darkDominionRounds);
+            compound.putInt("DominionTimer", abilityPhaseTimer);
+            compound.putDouble("DominionStartY", startingY);
+            net.minecraft.nbt.ListTag minionTags = new net.minecraft.nbt.ListTag();
+            for (Monster m : darkDominionMinions) {
+                if (m != null && !m.isRemoved()) {
+                    minionTags.add(net.minecraft.nbt.NbtUtils.createUUID(m.getUUID()));
+                }
+            }
+            for (UUID uuid : pendingMinionUUIDs) {
+                minionTags.add(net.minecraft.nbt.NbtUtils.createUUID(uuid));
+            }
+            compound.put("DominionMinions", minionTags);
+        }
     }
 
     @Override
@@ -148,14 +171,35 @@ public class LilithEntity extends Monster implements GeoEntity {
         super.readAdditionalSaveData(compound);
         if (!level().isClientSide()) applyConfigAttributes();
 
-        // Ability state isn't saved, so clear what an interrupted ability left behind
-        this.setNoAi(false);
-        this.setInvulnerable(false);
+        // She is immune to potion effects, so drop any that an older save left on her
+        this.removeAllEffects();
+
+        // Bat form is not saved, so always clear it
         this.setSilent(false);
         this.setInvisible(false);
-        this.isUsingDarkDominion = false;
         this.isTransformed = false;
-        this.darkDominionRounds = 0;
+
+        this.darkDominionMinions.clear();
+        this.pendingMinionUUIDs.clear();
+        if (compound.getBoolean("UsingDarkDominion")) {
+            // Resume Dark Dominion where it left off: still floating, invulnerable and AI-less
+            this.isUsingDarkDominion = true;
+            this.darkDominionRounds = compound.getInt("DominionRounds");
+            this.abilityPhaseTimer = Math.max(compound.getInt("DominionTimer"), 60);  // 3s to find the minions again
+            this.startingY = compound.getDouble("DominionStartY");
+            this.noPlayerTicks = 0;
+            this.setNoAi(true);
+            this.setInvulnerable(true);
+            net.minecraft.nbt.ListTag minionTags = compound.getList("DominionMinions", 11);
+            for (int i = 0; i < minionTags.size(); i++) {
+                this.pendingMinionUUIDs.add(net.minecraft.nbt.NbtUtils.loadUUID(minionTags.get(i)));
+            }
+        } else {
+            this.isUsingDarkDominion = false;
+            this.darkDominionRounds = 0;
+            this.setNoAi(false);
+            this.setInvulnerable(false);
+        }
 
         this.spinningFireballUUIDs.clear();
         if (compound.contains("SpinningFireballs", 9)) {
@@ -297,6 +341,19 @@ public class LilithEntity extends Monster implements GeoEntity {
                 this.setHealth(this.getMaxHealth());
                 return;
             }
+            // After a reload, find the wave's minions again (they load a moment after her)
+            if (!pendingMinionUUIDs.isEmpty()) {
+                ServerLevel serverLevel = (ServerLevel) level();
+                pendingMinionUUIDs.removeIf(uuid -> {
+                    Entity found = serverLevel.getEntity(uuid);
+                    if (found instanceof Monster m && m.isAlive()) {
+                        darkDominionMinions.add(m);
+                        return true;
+                    }
+                    return false;
+                });
+                if (abilityPhaseTimer <= 0) pendingMinionUUIDs.clear();   // give up on any we cannot find
+            }
             darkDominionMinions.removeIf(mob -> mob.isRemoved() || !mob.isAlive());
             double targetY = startingY + MAX_FLOAT_HEIGHT;
             if (this.getY() < targetY) {
@@ -313,7 +370,7 @@ public class LilithEntity extends Monster implements GeoEntity {
                     this.setNoAi(false);
                     this.setInvulnerable(false);
                     darkDominionRounds = 0;
-                    darkDominionCooldown = Config.DOMINION_COOLDOWN_TICKS.get();   // was 2000
+                    darkDominionCooldown = Config.DOMINION_COOLDOWN_TICKS.get();
                     Player p = level().getNearestPlayer(this, 32);
                     if (p != null) this.setTarget(p);
                 } else {
@@ -458,7 +515,7 @@ public class LilithEntity extends Monster implements GeoEntity {
             this.setTarget(null);
 
             playSound(SoundEvents.BAT_TAKEOFF, 1.0F, 1.0F);
-            startAttackAnimation(3);
+            startAttackAnimation(3);   // spin + raised hands
             playAttackSound(3);
         }
     }
@@ -572,7 +629,7 @@ public class LilithEntity extends Monster implements GeoEntity {
             darkDominionMinions.clear();
             spawnDarkDominionWave();
 
-            startAttackAnimation(2);
+            startAttackAnimation(3);   // spin + raised hands
             playAttackSound(2);
         }
     }
@@ -610,7 +667,7 @@ public class LilithEntity extends Monster implements GeoEntity {
                 setDeltaMovement(target.getX() - getX(), 0.2, target.getZ() - getZ());
                 target.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 60, 0));
                 target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1));
-                startAttackAnimation(1);
+                startAttackAnimation(2);   // forward jab
                 playAttackSound(1);
             }
             shadowDashCooldown = 600;
@@ -624,15 +681,31 @@ public class LilithEntity extends Monster implements GeoEntity {
                 player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 300, 0));
             }
             darkVeilCooldown = 1800;
-            startAttackAnimation(2);
+            startAttackAnimation(3);   // spin + raised hands
             playAttackSound(2);
         }
     }
 
+    /**
+     * Ability casts. Starts the matching attack animation on every client (type 1/2/3 =
+     * attack / attack2 / attack3) and locks her out of starting another ability for ~1 second.
+     */
     private void startAttackAnimation(int type) {
         isAttacking = true;
         attackTimer = 20;
-        attackType = type;
+        triggerAnim("attack", "attack" + type);
+    }
+
+    /**
+     * Every normal melee swing (and her Hellfire throw, which calls swing()) plays attack or attack2.
+     * This does NOT set isAttacking, so melee never blocks her abilities.
+     */
+    @Override
+    public void swing(InteractionHand hand, boolean updateSelf) {
+        super.swing(hand, updateSelf);
+        if (!level().isClientSide() && !isAttacking && !isUsingDarkDominion && !isTransformed) {
+            triggerAnim("attack", random.nextBoolean() ? "attack1" : "attack2");
+        }
     }
 
     private void playAttackSound(int type) {
@@ -665,19 +738,21 @@ public class LilithEntity extends Monster implements GeoEntity {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "controller", 0, state -> {
-            if (isAttacking) {
-                return switch (attackType) {
-                    case 2 -> state.setAndContinue(ATTACK2_ANIM);
-                    case 3 -> state.setAndContinue(ATTACK3_ANIM);
-                    default -> state.setAndContinue(ATTACK_ANIM);
-                };
-            } else if (state.isMoving()) {
+        // Movement controller: runs on the client and picks walk or idle
+        controllers.add(new AnimationController<>(this, "move", 0, state -> {
+            if (state.isMoving()) {
+                // With a run animation: return state.setAndContinue(isAggressive() ? RUN_ANIM : WALK_ANIM);
                 return state.setAndContinue(WALK_ANIM);
-            } else {
-                return state.setAndContinue(IDLE_ANIM);
             }
+            return state.setAndContinue(IDLE_ANIM);
         }));
+
+        // Attack controller: does nothing until the server triggers an attack animation.
+        // It is added after "move", so the attack animation wins on any bones both animate.
+        controllers.add(new AnimationController<>(this, "attack", 0, state -> PlayState.STOP)
+                .triggerableAnim("attack1", ATTACK_ANIM)
+                .triggerableAnim("attack2", ATTACK2_ANIM)
+                .triggerableAnim("attack3", ATTACK3_ANIM));
     }
 
     @Override
@@ -708,6 +783,18 @@ public class LilithEntity extends Monster implements GeoEntity {
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         this.playSound(SoundEvents.ZOMBIE_STEP, 0.15F, 1.0F);
+    }
+
+    // Lilith cannot be poisoned, weakened, slowed or healed by potions or effects of any kind
+    @Override
+    public boolean canBeAffected(MobEffectInstance effect) {
+        return false;
+    }
+
+    // Also blocks instant effects from splash potions (Harming / Healing), which skip addEffect()
+    @Override
+    public boolean isAffectedByPotions() {
+        return false;
     }
 
     @Override

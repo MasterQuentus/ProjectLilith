@@ -129,6 +129,11 @@ public class ModModelProvider {
             super(output, ProjectLilith.MOD_ID, existingFileHelper);
         }
 
+        private void generated(String name) {
+            withExistingParent(name, "item/generated")
+                    .texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/" + name));
+        }
+
         @Override
         protected void registerModels() {
             withExistingParent("lilith_contract", "item/generated").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/lilith_contract"));
@@ -136,6 +141,11 @@ public class ModModelProvider {
             withExistingParent("flint_and_hellfire", "item/generated").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/flint_and_hellfire"));
             withExistingParent("hellfire_charge", "item/generated").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/hellfire_charge"));
             withExistingParent("crimson_fang", "item/handheld").texture("layer0", ResourceLocation.fromNamespaceAndPath(ProjectLilith.MOD_ID, "item/crimson_fang"));
+
+            generated("abyssal_helmet");
+            generated("abyssal_chestplate");
+            generated("abyssal_leggings");
+            generated("abyssal_boots");
 
             // Lilith Spawn Egg
             withExistingParent("lilith_spawn_egg", mcLoc("item/template_spawn_egg"));

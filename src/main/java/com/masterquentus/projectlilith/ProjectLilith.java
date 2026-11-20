@@ -1,5 +1,6 @@
 package com.masterquentus.projectlilith;
 
+import com.masterquentus.projectlilith.ability.ModAttachments;
 import com.masterquentus.projectlilith.block.ModBlocks;
 import com.masterquentus.projectlilith.creativemodtab.ModCreativeModTabs;
 import com.masterquentus.projectlilith.entity.ModEntities;
@@ -33,6 +34,7 @@ public class ProjectLilith {
         ModBlocks.register(modEventBus);
         ModArmorMaterials.register(modEventBus);
         ModEntities.register(modEventBus);
+        ModAttachments.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in
         NeoForge.EVENT_BUS.register(this);
